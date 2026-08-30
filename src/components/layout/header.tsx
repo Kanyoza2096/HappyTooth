@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useSyncExternalStore } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTheme } from 'next-themes';
 import { Sun, Moon, LogOut, Menu, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -12,26 +12,31 @@ import { DEFAULT_CLINIC_PROFILE } from '@/lib/clinic-profile';
 
 interface HeaderProps {
   user?: AuthenticatedUser | null;
-  clinic?: ClinicProfile | null;  // ← ADDED
+  clinic?: ClinicProfile | null;
   onOpenMobileNav?: () => void;
   onLogout?: () => Promise<void>;
 }
 
-const emptySubscribe = () => () => {};
-
-export function Header({ user, clinic, onOpenMobileNav, onLogout }: HeaderProps) {  // ← ADDED clinic
+export function Header({ user, clinic, onOpenMobileNav, onLogout }: HeaderProps) {
   const { theme, resolvedTheme, setTheme } = useTheme();
-  const mounted = useSyncExternalStore(
-    emptySubscribe,
-    () => true,
-    () => false
-  );
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const isDark = (theme === 'system' ? resolvedTheme : theme) === 'dark';
 
   const toggleTheme = () => {
     setTheme(isDark ? 'light' : 'dark');
   };
+
+  // Safe clinic name resolution
+  const clinicName = (clinic as any)?.name 
+    || (clinic as any)?.clinic_name 
+    || (clinic as any)?.display_name 
+    || (DEFAULT_CLINIC_PROFILE as any)?.name 
+    || "HappyTooth";
 
   return (
     <header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between border-b border-slate-200/80 bg-white/80 px-4 sm:px-6 backdrop-blur-md dark:border-slate-800 dark:bg-slate-900/80">
@@ -47,12 +52,11 @@ export function Header({ user, clinic, onOpenMobileNav, onLogout }: HeaderProps)
         </Button>
         <div>
           <h2 className="text-sm font-semibold text-slate-800 dark:text-slate-200 hidden sm:block truncate max-w-[240px]">
-            {clinic?.name || "HappyTooth"}  {/* ← FIXED */}
+            {clinicName}
           </h2>
         </div>
       </div>
 
-      {/* Rest of your component stays the same */}
       <div className="flex items-center gap-3">
         {mounted ? (
           <Button
