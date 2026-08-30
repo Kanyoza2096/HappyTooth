@@ -12,13 +12,14 @@ import { DEFAULT_CLINIC_PROFILE } from '@/lib/clinic-profile';
 
 interface HeaderProps {
   user?: AuthenticatedUser | null;
+  clinic?: ClinicProfile | null;  // ← ADDED
   onOpenMobileNav?: () => void;
   onLogout?: () => Promise<void>;
 }
 
 const emptySubscribe = () => () => {};
 
-export function Header({ user, onOpenMobileNav, onLogout }: HeaderProps) {
+export function Header({ user, clinic, onOpenMobileNav, onLogout }: HeaderProps) {  // ← ADDED clinic
   const { theme, resolvedTheme, setTheme } = useTheme();
   const mounted = useSyncExternalStore(
     emptySubscribe,
@@ -46,13 +47,13 @@ export function Header({ user, onOpenMobileNav, onLogout }: HeaderProps) {
         </Button>
         <div>
           <h2 className="text-sm font-semibold text-slate-800 dark:text-slate-200 hidden sm:block truncate max-w-[240px]">
-            {brand.clinic_name}
+            {clinic?.name || "HappyTooth"}  {/* ← FIXED */}
           </h2>
         </div>
       </div>
 
+      {/* Rest of your component stays the same */}
       <div className="flex items-center gap-3">
-        {/* Theme Toggle */}
         {mounted ? (
           <Button
             variant="ghost"
@@ -72,7 +73,6 @@ export function Header({ user, onOpenMobileNav, onLogout }: HeaderProps) {
           <div className="h-9 w-9" />
         )}
 
-        {/* User Info & Avatar */}
         {user ? (
           <div className="flex items-center gap-3 pl-2 border-l border-slate-200 dark:border-slate-800">
             <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-tr from-sky-600 to-cyan-500 text-white font-semibold text-xs shadow-sm">
